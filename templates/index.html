@@ -1,0 +1,68 @@
+
+<h2>Tableau de suivi CNAPS</h2>
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Formation</th>
+            <th>Dates de formation</th>
+            <th>Lien CNAPS</th>
+            <th>Statut du dossier</th>
+            <th>Statut CNAPS</th>
+            <th>Commentaires</th>
+            <th>Documents</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for dossier in dossiers %}
+        <tr>
+            <td>{{ dossier.nom }}</td>
+            <td>{{ dossier.prenom }}</td>
+            <td>{{ dossier.formation }}</td>
+            <td>{{ dossier.session }}</td>
+            <td><a href="{{ dossier.lien }}" target="_blank">{{ dossier.lien }}</a></td>
+            <td>
+                <form action="/statut/{{ dossier.id }}" method="post">
+                    <select name="statut" onchange="this.form.submit()">
+                        <option value="INCOMPLET" {% if dossier.statut == 'INCOMPLET' %}selected{% endif %}>🟠 Incomplet</option>
+                        <option value="COMPLET" {% if dossier.statut == 'COMPLET' %}selected{% endif %}>🟢 Complet</option>
+                    </select>
+                </form>
+            </td>
+            <td>
+                <form action="/statut_cnaps/{{ dossier.id }}" method="post">
+                    <select name="statut_cnaps" onchange="this.form.submit()">
+                        {% for s in statuts_disponibles %}
+                        <option value="{{ s }}" {% if dossier.statut_cnaps == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                        <option value="Instruction en cours" {% if dossier.statut_cnaps == 'Instruction en cours' %}selected{% endif %}>Instruction en cours</option>
+                        <option value="Accepté" {% if dossier.statut_cnaps == 'Accepté' %}selected{% endif %}>Accepté</option>
+                        <option value="Refusé" {% if dossier.statut_cnaps == 'Refusé' %}selected{% endif %}>Refusé</option>
+                    </select>
+                </form>
+            </td>
+            <td>
+                <form action="/commentaire/{{ dossier.id }}" method="post">
+                    <textarea name="commentaire" rows="2" cols="20" onchange="this.form.submit()">{{ dossier.commentaire }}</textarea>
+                </form>
+            </td>
+            <td>
+                {% if dossier.documents %}
+                    {% for doc in dossier.documents.split(',') %}
+                        <a href="{{ url_for('static', filename='uploads/' ~ doc) }}" download>{{ doc }}</a><br>
+                    {% endfor %}
+                {% else %}
+                    Aucun
+                {% endif %}
+            </td>
+            <td>
+                <a href="/attestation/{{ dossier.id }}">📄</a>
+                <a href="/telecharger/{{ dossier.id }}">⬇️</a>
+                <a href="/supprimer/{{ dossier.id }}" onclick="return confirm('Supprimer ce dossier ?')">🗑️</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
